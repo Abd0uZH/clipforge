@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ClipForge — AI UGC Video Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080a;
+  --surface:#0f1117;
+  --surface2:#161820;
+  --border:#ffffff12;
+  --border2:#ffffff22;
+  --text:#f0f0ee;
+  --muted:#888a8f;
+  --accent:#c8ff47;
+  --accent2:#7b5ea7;
+  --accent3:#ff6b47;
+  --radius:12px;
+  --radius-lg:20px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.65;min-height:100vh;overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 40px;background:var(--bg);border-bottom:1px solid var(--border)}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.5px}
+.logo span{color:var(--accent)}
+.nav-links{display:flex;gap:28px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--accent);color:#000;padding:9px 20px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;transition:opacity .2s}
+.nav-cta:hover{opacity:.85}
+
+/* HERO */
+.hero{padding:160px 40px 80px;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border2);border-radius:100px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--accent);margin-bottom:24px;letter-spacing:.5px}
+.hero-tag::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+h1{font-family:'Syne',sans-serif;font-size:52px;font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:20px}
+h1 em{font-style:normal;color:var(--accent)}
+.hero-desc{color:var(--muted);font-size:16px;line-height:1.7;margin-bottom:32px;max-width:440px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn-main{background:var(--accent);color:#000;padding:13px 28px;border-radius:var(--radius);font-size:15px;font-weight:600;border:none;cursor:pointer;transition:opacity .2s,transform .1s;font-family:'DM Sans',sans-serif}
+.btn-main:hover{opacity:.9;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text);padding:13px 28px;border-radius:var(--radius);font-size:15px;font-weight:500;border:1px solid var(--border2);cursor:pointer;transition:background .2s;font-family:'DM Sans',sans-serif}
+.btn-ghost:hover{background:var(--surface2)}
+
+/* HERO VISUAL */
+.hero-visual{position:relative}
+.video-mockup{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:16px;aspect-ratio:9/16;max-width:220px;margin:0 auto;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden}
+.vm-top{display:flex;justify-content:space-between;align-items:center}
+.vm-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.vm-title{font-size:10px;color:var(--muted)}
+.vm-scene{flex:1;border-radius:8px;background:var(--surface2);display:flex;flex-direction:column;justify-content:flex-end;padding:10px;position:relative;overflow:hidden}
+.vm-scene::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#7b5ea720,#c8ff4710)}
+.vm-hook{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--accent);line-height:1.2;margin-bottom:4px}
+.vm-sub{font-size:9px;color:#fff8;line-height:1.4}
+.vm-progress{height:3px;background:var(--border2);border-radius:2px;overflow:hidden}
+.vm-bar{height:100%;width:65%;background:var(--accent);border-radius:2px;animation:prog 3s ease-in-out infinite alternate}
+@keyframes prog{from{width:20%}to{width:90%}}
+.vm-controls{display:flex;gap:6px}
+.vm-btn{flex:1;height:28px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);font-size:9px;color:var(--muted);cursor:pointer}
+.floating-badge{position:absolute;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:8px 12px;font-size:11px;font-weight:500;white-space:nowrap;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.fb1{top:10%;right:-20px;color:var(--accent);animation-delay:.5s}
+.fb2{bottom:25%;left:-30px;color:#a78bfa;animation-delay:1.2s}
+.fb3{bottom:8%;right:-10px;color:var(--accent3);animation-delay:.8s}
+
+/* SECTION */
+section{max-width:1100px;margin:0 auto;padding:80px 40px}
+.section-tag{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+h2{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px}
+.sub{color:var(--muted);font-size:16px;max-width:540px;line-height:1.7;margin-bottom:48px}
+
+/* MAIN APP */
+#app{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.app-tabs{display:flex;border-bottom:1px solid var(--border)}
+.tab{padding:14px 24px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif}
+.tab.active{color:var(--text);border-bottom:2px solid var(--accent)}
+.tab-content{display:none;padding:28px}
+.tab-content.active{display:block}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.3px}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{border-color:#c8ff4744}
+select option{background:var(--surface2)}
+textarea{resize:vertical;min-height:80px}
+
+/* API KEY */
+.api-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:20px}
+.api-row input{flex:1}
+.api-status{font-size:12px;padding:4px 10px;border-radius:20px;font-weight:500}
+.api-ok{background:#c8ff4720;color:var(--accent)}
+.api-err{background:#ff6b4720;color:var(--accent3)}
+
+/* GENERATE BTN */
+.gen-btn{width:100%;margin-top:20px;padding:14px;background:var(--accent);color:#000;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;border:none;border-radius:var(--radius);cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:.3px}
+.gen-btn:hover{opacity:.9;transform:translateY(-1px)}
+.gen-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+/* OUTPUT */
+.output-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:20px;min-height:200px}
+.output-box pre{font-family:'DM Mono',monospace;font-size:13px;white-space:pre-wrap;color:var(--text);line-height:1.7}
+.scenes-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+.scene-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;text-align:center}
+.scene-card .sc-name{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px}
+.scene-card .sc-dur{font-size:11px;color:var(--muted)}
+.scene-card .sc-desc{font-size:11px;color:var(--text);margin-top:6px;line-height:1.4}
+.result-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.meta-item{background:var(--surface2);border-radius:var(--radius);padding:12px}
+.meta-item .mk{font-size:11px;color:var(--muted);margin-bottom:4px}
+.meta-item .mv{font-size:13px;font-weight:500;color:var(--text)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.b-accent{background:#c8ff4720;color:var(--accent)}
+.b-purple{background:#7b5ea720;color:#a78bfa}
+.b-orange{background:#ff6b4720;color:var(--accent3)}
+.loading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:14px;padding:20px 0}
+.spinner{width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-box{background:#ff6b4715;border:1px solid #ff6b4740;border-radius:var(--radius);padding:14px;color:var(--accent3);font-size:13px}
+
+/* PROMPT TAB */
+.prompt-display{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:18px;font-family:'DM Mono',monospace;font-size:12px;color:var(--muted);white-space:pre-wrap;line-height:1.7;max-height:400px;overflow-y:auto}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px}
+.step{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px}
+.step-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--accent);opacity:.4;margin-bottom:12px}
+.step h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:8px}
+.step p{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:32px 40px;max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+.footer-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:16px}
+.footer-logo span{color:var(--accent)}
+footer p{font-size:13px;color:var(--muted)}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--border);max-width:1100px;margin:0 auto}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+@media(max-width:768px){
+  nav{padding:16px 20px}
+  .nav-links{display:none}
+  .hero{grid-template-columns:1fr;padding:120px 20px 60px;gap:40px}
+  h1{font-size:38px}
+  .hero-visual{order:-1}
+  section{padding:60px 20px}
+  .form-grid{grid-template-columns:1fr}
+  .scenes-grid{grid-template-columns:repeat(2,1fr)}
+  .result-meta{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr 1fr}
+  footer{flex-direction:column;gap:12px;text-align:center;padding:24px 20px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Clip<span>Forge</span></div>
+  <ul class="nav-links">
+    <li><a href="#app-section">Builder</a></li>
+    <li><a href="#how">How it works</a></li>
+  </ul>
+  <a href="#app-section" class="nav-cta">Start free</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-tag">AI-powered UGC videos</div>
+    <h1>Turn your assets into <em>viral videos</em></h1>
+    <p class="hero-desc">Upload your images and clips, describe your product, and let AI build a 35–40 second UGC video ready for TikTok, Reels, or YouTube Shorts.</p>
+    <div class="hero-btns">
+      <button class="btn-main" onclick="document.getElementById('app-section').scrollIntoView({behavior:'smooth'})">Build my video</button>
+      <button class="btn-ghost" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">See how it works</button>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="video-mockup">
+      <div class="vm-top"><div class="vm-dot"></div><div class="vm-title">UGC · 38s</div></div>
+      <div class="vm-scene">
+        <div class="vm-hook">Stop scrolling — this actually works 🔥</div>
+        <div class="vm-sub">Real results in 7 days. No BS.</div>
+      </div>
+      <div class="vm-progress"><div class="vm-bar"></div></div>
+      <div class="vm-controls">
+        <button class="vm-btn">Hook</button>
+        <button class="vm-btn">Proof</button>
+        <button class="vm-btn">CTA</button>
+      </div>
+    </div>
+    <div class="floating-badge fb1">✦ AI scene plan</div>
+    <div class="floating-badge fb2">⚡ 38 seconds</div>
+    <div class="floating-badge fb3">↗ Export ready</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- MAIN APP -->
+<section id="app-section">
+  <div class="section-tag">AI Builder</div>
+  <h2>Build your UGC video</h2>
+  <p class="sub">Fill in your brief and let the AI generate a complete video plan with scene structure, copy, transitions and music recommendations.</p>
+
+  <div id="app">
+    <div class="app-tabs">
+      <button class="tab active" onclick="switchTab('brief')">Brief</button>
+      <button class="tab" onclick="switchTab('result')">Result</button>
+      <button class="tab" onclick="switchTab('prompt')">Prompt sent</button>
+      <button class="tab" onclick="switchTab('settings')">API Settings</button>
+    </div>
+
+    <!-- BRIEF TAB -->
+    <div id="tab-brief" class="tab-content active">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Product name</label>
+          <input type="text" id="product" placeholder="ex: Rose Gold Glow Serum"/>
+        </div>
+        <div class="form-group full">
+          <label>Product description (optional)</label>
+          <textarea id="desc" placeholder="What does it do? What makes it unique?"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="category">
+            <option>Skincare</option>
+            <option>Food & drink</option>
+            <option>Fashion & accessories</option>
+            <option>Tech gadget</option>
+            <option>Fitness & wellness</option>
+            <option>Home decor</option>
+            <option>Beauty & makeup</option>
+            <option>Supplements</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tone & style</label>
+          <select id="tone">
+            <option>Energetic & fun</option>
+            <option>Calm & luxurious</option>
+            <option>Trustworthy & real</option>
+            <option>Funny & relatable</option>
+            <option>Inspirational & motivational</option>
+            <option>Educational & informative</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Target audience</label>
+          <select id="audience">
+            <option>Women 18–25</option>
+            <option>Women 25–35</option>
+            <option>Men 18–30</option>
+            <option>Men 30–45</option>
+            <option>All ages</option>
+            <option>Parents & families</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Platform</label>
+          <select id="platform">
+            <option>TikTok / Instagram Reels</option>
+            <option>YouTube Shorts</option>
+            <option>Instagram Feed</option>
+            <option>Facebook</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Video duration</label>
+          <select id="duration">
+            <option>35 seconds</option>
+            <option>40 seconds</option>
+            <option>30 seconds</option>
+            <option>60 seconds</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Main CTA</label>
+          <input type="text" id="cta" placeholder="ex: Shop now — link in bio"/>
+        </div>
+      </div>
+      <button class="gen-btn" id="genBtn" onclick="generatePlan()">⚡ Generate video plan with AI</button>
+    </div>
+
+    <!-- RESULT TAB -->
+    <div id="tab-result" class="tab-content">
+      <div id="result-area">
+        <p style="color:var(--muted);font-size:14px">No result yet — fill the brief and click Generate.</p>
+      </div>
+    </div>
+
+    <!-- PROMPT TAB -->
+    <div id="tab-prompt" class="tab-content">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">This is the exact prompt sent to the AI via OpenRouter:</p>
+      <div class="prompt-display" id="prompt-display">No prompt generated yet.</div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" class="tab-content">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Enter your <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--accent)">OpenRouter API key</a> to power the AI generation. Your key is stored only in your browser.</p>
+      <div class="api-row">
+        <div class="form-group" style="flex:1">
+          <label>OpenRouter API key</label>
+          <input type="password" id="apiKey" placeholder="sk-or-v1-..." oninput="saveKey()"/>
+        </div>
+        <span id="key-status"></span>
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label>Model</label>
+        <select id="model" onchange="saveKey()">
+          <option value="nvidia/nemotron-3-super-120b-a12b:free">Mistral 7B (fast, free)</option>
+          <option value="google/gemma-4-31b-it:free">Llama 3.1 8B (free)</option>
+          <option value="bytedance/seedance-2.0-fast">Claude 3 Haiku (fast)</option>
+          <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (best)</option>
+          <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+          <option value="openai/gpt-4o">GPT-4o</option>
+        </select>
+      </div>
+      <p style="font-size:12px;color:var(--muted)">Tip: Mistral 7B and Llama 3.1 8B are available on the free tier of OpenRouter — no payment needed to get started.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="divider"></div>
+<section id="how">
+  <div class="section-tag">Process</div>
+  <h2>How it works</h2>
+  <p class="sub">Four steps from brief to export-ready video plan.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">01</div><h3>Fill your brief</h3><p>Describe your product, pick your tone, audience and platform in seconds.</p></div>
+    <div class="step"><div class="step-num">02</div><h3>AI parses it</h3><p>The AI reads your brief and builds a complete scene-by-scene plan with copy, transitions and music mood.</p></div>
+    <div class="step"><div class="step-num">03</div><h3>Review & adjust</h3><p>See the full plan with hook text, scene descriptions, and CTA. Tweak anything you want.</p></div>
+    <div class="step"><div class="step-num">04</div><h3>Export & shoot</h3><p>Use the plan to record your clips or feed it into your video editor. Done in minutes.</p></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+<footer>
+  <div class="footer-logo">Clip<span>Forge</span></div>
+  <p>Powered by OpenRouter · Built with AI</p>
+</footer>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['brief','result','prompt','settings'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function saveKey() {
+  const k = document.getElementById('apiKey').value.trim();
+  if(k) localStorage.setItem('or_key', k);
+  const m = document.getElementById('model').value;
+  localStorage.setItem('or_model', m);
+  updateKeyStatus(k);
+}
+
+function updateKeyStatus(k) {
+  const el = document.getElementById('key-status');
+  if(k && k.startsWith('sk-or')) {
+    el.innerHTML = '<span class="api-status api-ok">Key saved</span>';
+  } else if(k) {
+    el.innerHTML = '<span class="api-status api-err">Invalid format</span>';
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+window.addEventListener('load', () => {
+  const k = localStorage.getItem('or_key') || '';
+  const m = localStorage.getItem('or_model') || 'mistralai/mistral-7b-instruct';
+  document.getElementById('apiKey').value = k;
+  document.getElementById('model').value = m;
+  updateKeyStatus(k);
+});
+
+function buildPrompt(data) {
+  return `You are a professional UGC video editor and copywriter. Create a complete video plan for the following product.
+
+PRODUCT: ${data.product}
+DESCRIPTION: ${data.desc || 'Not provided'}
+CATEGORY: ${data.category}
+TONE: ${data.tone}
+TARGET AUDIENCE: ${data.audience}
+PLATFORM: ${data.platform}
+DURATION: ${data.duration}
+CALL TO ACTION: ${data.cta || 'Link in bio'}
+
+Generate a complete JSON response with this exact structure:
+{
+  "hook_text": "The opening text overlay (attention-grabbing, max 8 words)",
+  "hook_type": "Problem-first | Curiosity | Shocking stat | Relatable situation",
+  "scenes": [
+    {"name": "Hook", "duration": "4s", "visual": "what to show", "text_overlay": "on-screen text", "tip": "filming tip"},
+    {"name": "Problem", "duration": "6s", "visual": "what to show", "text_overlay": "on-screen text", "tip": "filming tip"},
+    {"name": "Solution", "duration": "12s", "visual": "what to show", "text_overlay": "on-screen text", "tip": "filming tip"},
+    {"name": "Proof", "duration": "8s", "visual": "what to show", "text_overlay": "on-screen text", "tip": "filming tip"},
+    {"name": "CTA", "duration": "6s", "visual": "what to show", "text_overlay": "on-screen text", "tip": "filming tip"}
+  ],
+  "music_mood": "description of music style",
+  "transition_style": "cut style description",
+  "caption_style": "subtitle style",
+  "color_mood": "warm/cool/neutral and why",
+  "pro_tip": "one specific tip to make this video go viral"
+}
+
+Respond with ONLY valid JSON. No explanation, no markdown, no backticks. Do not use unescaped quotation marks inside the text values. Do not include trailing commas`;
+}
+
+async function generatePlan() {
+  const apiKey = localStorage.getItem('or_key') || '';
+  const model  = localStorage.getItem('or_model') || 'mistralai/mistral-7b-instruct';
+
+  if(!apiKey || !apiKey.startsWith('sk-or')) {
+    switchTab('settings');
+    alert('Please add your OpenRouter API key in the Settings tab first.');
+    return;
+  }
+
+  const data = {
+    product:  document.getElementById('product').value.trim() || 'My product',
+    desc:     document.getElementById('desc').value.trim(),
+    category: document.getElementById('category').value,
+    tone:     document.getElementById('tone').value,
+    audience: document.getElementById('audience').value,
+    platform: document.getElementById('platform').value,
+    duration: document.getElementById('duration').value,
+    cta:      document.getElementById('cta').value.trim()
+  };
+
+  const prompt = buildPrompt(data);
+  document.getElementById('prompt-display').textContent = prompt;
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  switchTab('result');
+  document.getElementById('result-area').innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>AI is building your video plan...</span>
+    </div>`;
+
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey,
+        'HTTP-Referer': window.location.href,
+        'X-Title': 'ClipForge UGC Builder'
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 1200,
+        temperature: 0.8
+      })
+    });
+
+    if(!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || 'API error ' + res.status);
+    }
+
+    const json = await res.json();
+    const raw  = json.choices?.[0]?.message?.content || '';
+
+    let plan;
+    try {
+      // Find the first '{' and the last '}' to ignore any extra conversational text
+      const startIndex = raw.indexOf('{');
+      const endIndex = raw.lastIndexOf('}');
+      
+      if (startIndex === -1 || endIndex === -1) {
+          throw new Error('No JSON object found in the AI response.');
+      }
+      
+      const clean = raw.substring(startIndex, endIndex + 1);
+      plan = JSON.parse(clean);
+    } catch(e) {
+      console.error("Failed to parse JSON. Raw AI Output:", raw); // Helpful for debugging
+      throw new Error('AI returned invalid JSON. Try again.');
+    }
+
+
+    renderResult(plan, data);
+
+  } catch(err) {
+    document.getElementById('result-area').innerHTML = `
+      <div class="error-box">
+        <strong>Error:</strong> ${err.message}<br/>
+        <span style="font-size:12px;opacity:.8">Check your API key in Settings, or try a different model.</span>
+      </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ Generate video plan with AI';
+  }
+}
+
+function renderResult(plan, data) {
+  const sceneColors = ['b-accent','b-purple','b-accent','b-orange','b-purple'];
+  const scenesHtml = (plan.scenes || []).map((s,i) => `
+    <div class="scene-card">
+      <div class="sc-name">${s.name}</div>
+      <div class="sc-dur">${s.duration}</div>
+      <div class="sc-desc">${s.text_overlay || s.visual || ''}</div>
+    </div>`).join('');
+
+  const detailHtml = (plan.scenes || []).map(s => `
+    <div style="background:var(--surface2);border-radius:var(--radius);padding:14px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--accent)">${s.name}</span>
+        <span class="badge b-accent">${s.duration}</span>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:6px"><strong style="color:var(--text)">Visual:</strong> ${s.visual || '—'}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:6px"><strong style="color:var(--text)">Text overlay:</strong> "${s.text_overlay || '—'}"</div>
+      <div style="font-size:12px;background:#c8ff4710;border-radius:6px;padding:6px 10px;color:var(--accent)">💡 ${s.tip || ''}</div>
+    </div>`).join('');
+
+  document.getElementById('result-area').innerHTML = `
+    <div style="margin-bottom:20px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Hook text</div>
+      <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent);line-height:1.2">"${plan.hook_text || ''}"</div>
+      <div style="margin-top:8px"><span class="badge b-purple">${plan.hook_type || ''}</span></div>
+    </div>
+
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase">Scene timeline</div>
+    <div class="scenes-grid">${scenesHtml}</div>
+
+    <div class="result-meta">
+      <div class="meta-item"><div class="mk">Music mood</div><div class="mv">${plan.music_mood || '—'}</div></div>
+      <div class="meta-item"><div class="mk">Transitions</div><div class="mv">${plan.transition_style || '—'}</div></div>
+      <div class="meta-item"><div class="mk">Color mood</div><div class="mv">${plan.color_mood || '—'}</div></div>
+    </div>
+
+    <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase">Scene breakdown</div>
+    ${detailHtml}
+
+    ${plan.pro_tip ? `
+    <div style="background:#c8ff4710;border:1px solid #c8ff4730;border-radius:var(--radius);padding:14px;margin-top:4px">
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:4px">PRO TIP</div>
+      <div style="font-size:13px;color:var(--text)">${plan.pro_tip}</div>
+    </div>` : ''}
+
+    <button class="gen-btn" style="margin-top:20px" onclick="switchTab('brief')">← Edit brief & regenerate</button>
+  `;
+}
+</script>
+</body>
+</html>
